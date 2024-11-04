@@ -221,6 +221,19 @@ public class SocialServer implements Server {
             System.out.println("Invalid image");
             }
         }
+        public boolean searchUser(String username) {
+            BufferedReader bfr = new BufferedReader(new FileReader(Users));
+            String line = bfr.readLine();
+            if (!(line == null)) {
+                do {
+                    if (username.equals(line) {
+                        return true;
+                    }
+                    line = bfr.readLine();
+                } while (!(line == null));
+                return false;
+            }
+        }
     }
 
 // garvt | garvtpassword | garvtpfp | bio
