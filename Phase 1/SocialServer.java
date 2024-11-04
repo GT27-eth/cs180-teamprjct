@@ -234,6 +234,29 @@ public class SocialServer implements Server {
                 return false;
             }
         }
+        public boolean confirmUsernameAndPassword(String username, String password) {
+            BufferedReader bfr = new BufferedReader(new FileReader(UserInfo));
+            PrintWriter pw = new PrintWriter(new FileWriter(UserInfo));
+
+            ArrayList<String> userinfo = new ArrayList<>();
+            String line = bfr.readLine();
+            while (line != null) {
+                userinfo.add(line);
+                bfr.readLine();
+            }
+
+            ArrayList<String[]> userinfodetailed = new ArrayList<>();
+            for (int i = 0; i < userinfo.size(); i++) {
+                String[] data = userinfo.get(i).split(" | ");
+                userinfodetailed.get(i)[0] = data[0]; // username
+                userinfodetailed.get(i)[1] = data[1]; // user Password
+                userinfodetailed.get(i)[2] = data[2]; // user pfp
+            }
+            // Example format of userinfodetailed
+            /*
+             * < {garvt | garvpassword | Default PFP},
+             * {aneeshk | aneeshpassword | aneeshkpfp.jpg}>
+             */
     }
 
 // garvt | garvtpassword | garvtpfp | bio
