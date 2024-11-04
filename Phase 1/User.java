@@ -86,20 +86,23 @@ class User implements UserInterface {
         System.out.println("Bio updated.");
     }
 
-    public void addFriend(User friend) throws FriendActionException, BlockedActionException {
-        if (friends.contains(friend)) {
+    public void addFriend(User friend) throws FriendActionException, BlockedActionException, UserNotFoundException {
+        if (friends.contains(friend) && searchUser(friend.getUsername())) {
             throw new FriendActionException("User is already a friend!");
-        }
-        if (blocked.contains(friend)) {
+        } else if (blocked.contains(friend) && searchUser(friend.getUsername())) {
             throw new BlockedActionException("User has been blocked!");
+        } else if (!searchUser(friend.getUsername())) {
+            throw new UserNotFoundException("User not found!");
         }
         friends.add(friend);
         System.out.println("Friend added successfully.");
     }
 
-    public void removeFriend(User friend) throws FriendActionException {
-        if (!friends.contains(friend)) {
+    public void removeFriend(User friend) throws FriendActionException, UserNotFoundException {
+        if (!friends.contains(friend) && searchUser(friend.getUsername())) {
             throw new FriendActionException("User isn't a friend!");
+        } else if (!searchUser(friend.getUsername())) {
+            throw new UserNotFoundException("User not found!");
         }
         friends.remove(friend);
         System.out.println("Friend removed successfully.");
