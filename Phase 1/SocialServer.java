@@ -65,7 +65,7 @@ public class SocialServer implements Server {
 }
 
 
-    public void editUsername(User user, String newUsername) throws InvalidCredentialsException, IOException, UserNotFoundException  {
+    public void editUsername(User user, String username, String password) throws InvalidCredentialsException, IOException, UserNotFoundException  {
         /*
          * LINES 46 TO 62 CAN BE REUSED EVERYWHERE
          * ArrayList userinfo = first read from UserInfo file
@@ -75,9 +75,6 @@ public class SocialServer implements Server {
          * Make changes to username.
          * ArrayList updatedUserinfo = array after making changes
          */
-        if(newUsername.length()<3){
-            throw new InvalidCredentialsException("Invalid username: must be at least 3 characters.");
-        }
         try {
             BufferedReader bfr = new BufferedReader(new FileReader(UserInfo));
             PrintWriter pw = new PrintWriter(new FileWriter(UserInfo));
@@ -101,14 +98,31 @@ public class SocialServer implements Server {
              * < {garvt | garvpassword | Default PFP},
              * {aneeshk | aneeshpassword | aneeshkpfp.jpg}>
              */
-
+            
+             do {
+                 System.out.println("Enter new username: ");
+                 if (newUsername.length() < 3) {
+                 throw new InvalidCredentialsException("Invalid username: must be at least 3 characters.");
+                 }
+             } while (newUsername.length() < 3);
+                 
+            String newUsername = sc.nextLine();
+            System.out.println("Enter old username: ");
+            String username = sc.nextLine();
+            System.out.println("Enter old password: ");
+            String password = sc.nextLine();
+            
             ArrayList<String> updatedUserinfo = new ArrayList<>();
-            for (String[] details : userinfodetailed) { // 63-69 makes changes to arraylist
+            if (confirmUsernameAndPassword(username, password)) {
+                
+            }
+            
+            /*for (String[] details : userinfodetailed) { // 63-69 makes changes to arraylist
                 if (details[0] == user.getUsername() && confirmWithPassword(user)) {
                     details[0] = newUsername;
                 }
                 updatedUserinfo.add(details[0] + " | " + details[1] + " | " + details[2]);
-            }
+            }*/
 
             if (updatedUserinfo.isEmpty()) {
                 throw new UserNotFoundException("User not found in the system.");
@@ -240,9 +254,13 @@ public class SocialServer implements Server {
 
             ArrayList<String> userinfo = new ArrayList<>();
             String line = bfr.readLine();
-            while (line != null) {
-                userinfo.add(line);
-                bfr.readLine();
+            if (line != null) {
+                do {
+                    userinfo.add(line);
+                    line = bfr.readLine();
+                } while (line != null);
+            } else {
+                throw new Exception e.getMessage();
             }
 
             ArrayList<String[]> userinfodetailed = new ArrayList<>();
@@ -251,6 +269,13 @@ public class SocialServer implements Server {
                 userinfodetailed.get(i)[0] = data[0]; // username
                 userinfodetailed.get(i)[1] = data[1]; // user Password
                 userinfodetailed.get(i)[2] = data[2]; // user pfp
+                if (data[0].equals(username) && data[1].equals(password)) {
+                    bfr.close();
+                    return true;
+                }
+                System.out.println("Incorrect username or password");
+                bfr.close();
+                return false;
             }
             // Example format of userinfodetailed
             /*
