@@ -1,11 +1,15 @@
 // import Exceptions.*;
 import Exceptions.UserExceptions.*;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 class User implements UserInterface {
+    private final String Users = "./Database/userPassword.txt";
     private static int totalUsers = 0;
     private String userName;
     private String userPassword;
@@ -86,8 +90,25 @@ class User implements UserInterface {
         System.out.println("Bio updated.");
     }
 
+    public boolean searchUser(String username) {
+        try {
+            BufferedReader bfr = new BufferedReader(new FileReader(Users));
+            String line = bfr.readLine();
+            if (!(line == null)) {
+                do {
+                    if (username.equals(line)) {
+                        return true;
+                    }
+                    line = bfr.readLine();
+                } while (!(line == null));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } return false;
+    }
+
     public void addFriend(User friend) throws FriendActionException, BlockedActionException, UserNotFoundException {
-        if (friends.contains(friend) && searchUser(friend.getUsername())) {
+        if (friends.contains(friend) && friend.searchUser(friend.getUsername())) {
             throw new FriendActionException("User is already a friend!");
         } else if (blocked.contains(friend) && searchUser(friend.getUsername())) {
             throw new BlockedActionException("User has been blocked!");

@@ -19,24 +19,24 @@ public class SocialServer implements Server {
 
     public static boolean confirmWithPassword(User user) {
         Scanner sc = new Scanner(System.in);
-            System.out.print("Enter your password to confirm action: ");
+        System.out.print("Enter your password to confirm action: ");
 
-            try {
-                String inputPw = sc.nextLine();
-                sc.close();
-                if (inputPw.equals(user.getPassword())) {
-                    return true;
-                } else {
-                    System.out.println("Incorrect Password");
-                    return false;
-                }
-            } catch (NoSuchElementException e) {
-                System.out.println("Error reading password input: " + e.getMessage());
+        try {
+            String inputPw = sc.nextLine();
+            sc.close();
+            if (inputPw.equals(user.getPassword())) {
+                return true;
+            } else {
+                System.out.println("Incorrect Password");
                 return false;
-            } finally {
-                sc.close(); 
             }
+        } catch (NoSuchElementException e) {
+            System.out.println("Error reading password input: " + e.getMessage());
+            return false;
+        } finally {
+            sc.close();
         }
+    }
 
     public void createUser(User user) throws InvalidCredentialsException, IOException {
         if (user.getUsername().length() < 3) {
@@ -49,23 +49,23 @@ public class SocialServer implements Server {
             pw.write(user.toString());
         }
     }
-        
+
 
     public void createUser(String username, String password) throws InvalidCredentialsException, IOException {
-    if (username.length() < 3) {
-        
-    }
-    if (password.length() < 6) {
-        throw new InvalidCredentialsException("Invalid password: must be at least 6 characters.");
+        if (username.length() < 3) {
+
+        }
+        if (password.length() < 6) {
+            throw new InvalidCredentialsException("Invalid password: must be at least 6 characters.");
+        }
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter("Users.txt"))) {
+            pw.write(username + " | " + password + " | Default PFP" + " | ");
+        }
     }
 
-    try (PrintWriter pw = new PrintWriter(new FileWriter("Users.txt"))) {
-        pw.write(username + " | " + password + " | Default PFP" + " | ");
-    }
-}
 
-
-    public void editUsername(User user, String username, String password) throws InvalidCredentialsException, IOException, UserNotFoundException  {
+    public void editUsername(User user) throws InvalidCredentialsException, IOException, UserNotFoundException {
         /*
          * LINES 46 TO 62 CAN BE REUSED EVERYWHERE
          * ArrayList userinfo = first read from UserInfo file
@@ -75,46 +75,30 @@ public class SocialServer implements Server {
          * Make changes to username.
          * ArrayList updatedUserinfo = array after making changes
          */
+        Scanner sc = new Scanner(System.in);
+        String newUsername = "";
         try {
-            BufferedReader bfr = new BufferedReader(new FileReader(UserInfo));
-            PrintWriter pw = new PrintWriter(new FileWriter(UserInfo));
-
-            ArrayList<String> userinfo = new ArrayList<>();
-            String line = bfr.readLine();
-            while (line != null) {
-                userinfo.add(line);
-                bfr.readLine();
-            }
-
-            ArrayList<String[]> userinfodetailed = new ArrayList<>();
-            for (int i = 0; i < userinfo.size(); i++) {
-                String[] data = userinfo.get(i).split(" | ");
-                userinfodetailed.get(i)[0] = data[0]; // username
-                userinfodetailed.get(i)[1] = data[1]; // user Password
-                userinfodetailed.get(i)[2] = data[2]; // user pfp
-            }
             // Example format of userinfodetailed
             /*
              * < {garvt | garvpassword | Default PFP},
              * {aneeshk | aneeshpassword | aneeshkpfp.jpg}>
              */
-            
-             do {
-                 System.out.println("Enter new username: ");
-                 if (newUsername.length() < 3) {
-                 throw new InvalidCredentialsException("Invalid username: must be at least 3 characters.");
-                 }
-             } while (newUsername.length() < 3);
-                 
-            String newUsername = sc.nextLine();
+            do {
+                System.out.println("Enter new username: ");
+                newUsername = sc.nextLine();
+                if (newUsername.length() < 3) {
+                    System.out.println("Invalid username: must be at least 3 characters.");
+                }
+            } while (newUsername.length() < 3);
+
             System.out.println("Enter old username: ");
             String username = sc.nextLine();
             System.out.println("Enter old password: ");
             String password = sc.nextLine();
-            
+
             ArrayList<String> updatedUserinfo = new ArrayList<>();
             if (confirmUsernameAndPassword(username, password)) {
-                
+
             }
             
             /*for (String[] details : userinfodetailed) { // 63-69 makes changes to arraylist
@@ -139,7 +123,7 @@ public class SocialServer implements Server {
     }
 
     public void editUserPassword(User user, String newPassword) throws InvalidCredentialsException, UserNotFoundException, IOException {
-        
+
         if (newPassword.length() < 6) {
             throw new InvalidCredentialsException("Invalid password: must be at least 6 characters.");
         }
@@ -225,7 +209,7 @@ public class SocialServer implements Server {
             if (updatedUserinfo.isEmpty()) {
                 throw new UserNotFoundException("User not found in the system.");
             }
-            
+
             for (String updatedLine : updatedUserinfo) {
                 pw.write(updatedLine);
             }
@@ -233,56 +217,62 @@ public class SocialServer implements Server {
             pw.close();
         } catch (IOException io) {
             System.out.println("Invalid image");
-            }
         }
-        public boolean searchUser(String username) {
+    }
+
+    public boolean searchUser(String username) {    // may not be needed- added this method to User.java
+        try {
             BufferedReader bfr = new BufferedReader(new FileReader(Users));
             String line = bfr.readLine();
             if (!(line == null)) {
                 do {
-                    if (username.equals(line) {
+                    if (username.equals(line)) {
                         return true;
                     }
                     line = bfr.readLine();
                 } while (!(line == null));
-                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean confirmUsernameAndPassword(String username, String password) throws IOException,
+            UserNotFoundException {
+        BufferedReader bfr = new BufferedReader(new FileReader(UserInfo));
+        PrintWriter pw = new PrintWriter(new FileWriter(UserInfo));
+
+        ArrayList<String> userinfo = new ArrayList<>();
+        String line = bfr.readLine();
+        if (line != null) {
+            do {
+                userinfo.add(line);
+                line = bfr.readLine();
+            } while (line != null);
+        } else {
+            throw new IOException();
+        }
+
+        ArrayList<String[]> userinfodetailed = new ArrayList<>();
+        for (int i = 0; i < userinfo.size(); i++) {
+            String[] data = userinfo.get(i).split(" | ");
+            userinfodetailed.get(i)[0] = data[0]; // username
+            userinfodetailed.get(i)[1] = data[1]; // user Password
+            userinfodetailed.get(i)[2] = data[2]; // user pfp
+            if (data[0].equals(username) && data[1].equals(password)) {
+                bfr.close();
+                return true;
             }
         }
-        public boolean confirmUsernameAndPassword(String username, String password) {
-            BufferedReader bfr = new BufferedReader(new FileReader(UserInfo));
-            PrintWriter pw = new PrintWriter(new FileWriter(UserInfo));
-
-            ArrayList<String> userinfo = new ArrayList<>();
-            String line = bfr.readLine();
-            if (line != null) {
-                do {
-                    userinfo.add(line);
-                    line = bfr.readLine();
-                } while (line != null);
-            } else {
-                throw new Exception e.getMessage();
-            }
-
-            ArrayList<String[]> userinfodetailed = new ArrayList<>();
-            for (int i = 0; i < userinfo.size(); i++) {
-                String[] data = userinfo.get(i).split(" | ");
-                userinfodetailed.get(i)[0] = data[0]; // username
-                userinfodetailed.get(i)[1] = data[1]; // user Password
-                userinfodetailed.get(i)[2] = data[2]; // user pfp
-                if (data[0].equals(username) && data[1].equals(password)) {
-                    bfr.close();
-                    return true;
-                }
-                System.out.println("Incorrect username or password");
-                bfr.close();
-                return false;
-            }
-            // Example format of userinfodetailed
-            /*
-             * < {garvt | garvpassword | Default PFP},
-             * {aneeshk | aneeshpassword | aneeshkpfp.jpg}>
-             */
+        throw new UserNotFoundException("Incorrect username or password");
+        // Example format of userinfodetailed
+        /*
+         * < {garvt | garvpassword | Default PFP},
+         * {aneeshk | aneeshpassword | aneeshkpfp.jpg}>
+         */
     }
+}
 
 // garvt | garvtpassword | garvtpfp | bio
 // abc | password | pfp | bio

@@ -12,9 +12,9 @@ public interface UserInterface {
 
     public void setBio(String bio);
 
-    public void addFriend(User friend) throws FriendActionException, BlockedActionException;
+    public void addFriend(User friend) throws FriendActionException, BlockedActionException, UserNotFoundException;
 
-    public void removeFriend(User friend) throws FriendActionException;
+    public void removeFriend(User friend) throws FriendActionException, UserNotFoundException;
 
     public void blockUser(User user) throws BlockedActionException, FriendActionException;
 
