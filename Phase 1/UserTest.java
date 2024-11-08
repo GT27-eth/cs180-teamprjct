@@ -39,26 +39,27 @@ public class UserTest {
     }*/
 
     @Test
-    public void testAddFriend() throws FriendActionException, BlockedActionException {
+    public void testAddFriend() throws FriendActionException, BlockedActionException, UserNotFoundException {
         user.addFriend(friend);
         assertTrue(user.getFriends().contains(friend));
     }
 
     @Test(expected = FriendActionException.class)
-    public void testAddFriendAlreadyFriend() throws FriendActionException, BlockedActionException {
+    public void testAddFriendAlreadyFriend() throws FriendActionException, BlockedActionException,
+            UserNotFoundException {
         user.addFriend(friend);
         user.addFriend(friend); // Attempt to add the same friend again
     }
 
     @Test
-    public void testRemoveFriend() throws FriendActionException, BlockedActionException {
+    public void testRemoveFriend() throws FriendActionException, BlockedActionException, UserNotFoundException {
         user.addFriend(friend);
         user.removeFriend(friend);
         assertFalse(user.getFriends().contains(friend));
     }
 
     @Test(expected = FriendActionException.class)
-    public void testRemoveNonExistentFriend() throws FriendActionException {
+    public void testRemoveNonExistentFriend() throws FriendActionException, UserNotFoundException {
         user.removeFriend(friend); // Attempt to remove a non-existent friend
     }
 
