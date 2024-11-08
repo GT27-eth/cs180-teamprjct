@@ -53,7 +53,7 @@ public class SocialServer implements Server {
 
     public void createUser(String username, String password) throws InvalidCredentialsException, IOException {
         if (username.length() < 3) {
-
+            throw new InvalidCredentialsException("Invalid username: must be at least 3 characters.");
         }
         if (password.length() < 6) {
             throw new InvalidCredentialsException("Invalid password: must be at least 6 characters.");
@@ -77,6 +77,8 @@ public class SocialServer implements Server {
          */
         Scanner sc = new Scanner(System.in);
         String newUsername = "";
+        BufferedReader bfr = new BufferedReader(new FileReader(UserInfo));
+        PrintWriter pw = new PrintWriter(new FileWriter(UserInfo));
         try {
             // Example format of userinfodetailed
             /*
