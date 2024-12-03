@@ -4,7 +4,6 @@ import java.net.*;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.Timer;
-import java.util.*;
 
 public class SocialClient {
     private Socket socket;
@@ -237,12 +236,14 @@ public class SocialClient {
         String[] chatUsers = response.trim().split(" \\| ");
 
         JFrame frame = new JFrame("Chats - " + username);
-        frame.setSize(400, 600);
+        frame.setSize(600, 600); // Increased width to accommodate side panel
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null); // Center the window
 
-        JPanel panel = new JPanel(new BorderLayout());
+        // Main panel
+        JPanel mainPanel = new JPanel(new BorderLayout());
 
+        // Chat list
         DefaultListModel<String> listModel = new DefaultListModel<>();
         for (String user : chatUsers) {
             if (!user.trim().isEmpty()) {
@@ -256,6 +257,95 @@ public class SocialClient {
 
         JScrollPane scrollPane = new JScrollPane(chatList);
 
+        // Side panel with buttons
+        JPanel sidePanel = new JPanel();
+        sidePanel.setLayout(new GridLayout(5, 1, 5, 5));
+
+        JButton friendButton = new JButton("Friend User");
+        JButton unfriendButton = new JButton("Unfriend User");
+        JButton blockButton = new JButton("Block User");
+        JButton unblockButton = new JButton("Unblock User");
+        JButton searchButton = new JButton("Search User");
+
+        sidePanel.add(friendButton);
+        sidePanel.add(unfriendButton);
+        sidePanel.add(blockButton);
+        sidePanel.add(unblockButton);
+        sidePanel.add(searchButton);
+
+        // Add action listeners to buttons
+        friendButton.addActionListener(e -> {
+            String targetUser = JOptionPane.showInputDialog(frame, "Enter username to friend:");
+            if (targetUser != null && !targetUser.trim().isEmpty()) {
+                String response1 = client.sendRequest("friendUser", username, targetUser.trim());
+                if (response1.toLowerCase().contains("successfully")) {
+                    JOptionPane.showMessageDialog(frame, response1, "Friend User", JOptionPane.INFORMATION_MESSAGE);
+                    // Refresh the chat list
+                    frame.dispose();
+                    showChatList(client, username);
+                } else {
+                    JOptionPane.showMessageDialog(frame, response1, "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        unfriendButton.addActionListener(e -> {
+            String targetUser = JOptionPane.showInputDialog(frame, "Enter username to unfriend:");
+            if (targetUser != null && !targetUser.trim().isEmpty()) {
+                String response1 = client.sendRequest("unfriend", username, targetUser.trim());
+                if (response1.toLowerCase().contains("successfully")) {
+                    JOptionPane.showMessageDialog(frame, response1, "Unfriend User", JOptionPane.INFORMATION_MESSAGE);
+                    // Refresh the chat list
+                    frame.dispose();
+                    showChatList(client, username);
+                } else {
+                    JOptionPane.showMessageDialog(frame, response1, "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        blockButton.addActionListener(e -> {
+            String targetUser = JOptionPane.showInputDialog(frame, "Enter username to block:");
+            if (targetUser != null && !targetUser.trim().isEmpty()) {
+                String response1 = client.sendRequest("blockUser", username, targetUser.trim());
+                if (response1.toLowerCase().contains("successfully")) {
+                    JOptionPane.showMessageDialog(frame, response1, "Block User", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(frame, response1, "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        unblockButton.addActionListener(e -> {
+            String targetUser = JOptionPane.showInputDialog(frame, "Enter username to unblock:");
+            if (targetUser != null && !targetUser.trim().isEmpty()) {
+                String response1 = client.sendRequest("unblock", username, targetUser.trim());
+                if (response1.toLowerCase().contains("successfully")) {
+                    JOptionPane.showMessageDialog(frame, response1, "Unblock User", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(frame, response1, "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        searchButton.addActionListener(e -> {
+            String targetUser = JOptionPane.showInputDialog(frame, "Enter username to search:");
+            if (targetUser != null && !targetUser.trim().isEmpty()) {
+                String response1 = client.sendRequest("getUser", username, targetUser.trim());
+                if (response1.toLowerCase().contains("User Not Found") || response1.toLowerCase().contains("error")) {
+                    JOptionPane.showMessageDialog(frame, response1, "Search User", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(frame, response1, "Search User", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+        // Split pane to hold chat list and side panel
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, sidePanel);
+        splitPane.setDividerLocation(350); // Adjust as needed
+
+        mainPanel.add(splitPane, BorderLayout.CENTER);
+
         JButton messageButton = new JButton("Message Someone");
         messageButton.setFont(new Font("Arial", Font.PLAIN, 16));
         messageButton.addActionListener(e -> {
@@ -265,8 +355,7 @@ public class SocialClient {
             }
         });
 
-        panel.add(scrollPane, BorderLayout.CENTER);
-        panel.add(messageButton, BorderLayout.SOUTH);
+        mainPanel.add(messageButton, BorderLayout.SOUTH);
 
         chatList.addListSelectionListener(event -> {
             if (!event.getValueIsAdjusting()) {
@@ -277,7 +366,7 @@ public class SocialClient {
             }
         });
 
-        frame.add(panel);
+        frame.add(mainPanel);
         frame.setVisible(true);
     }
 
